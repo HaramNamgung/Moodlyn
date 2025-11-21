@@ -46,12 +46,28 @@ def detect_landmarks(image):
         'right_eyebrow': []
     }
     
-    left_eyebrow_indices = [159, 145, 144, 153, 154]
-    right_eyebrow_indices = [386, 372, 371, 380, 381]
-    left_eye_indices = [33, 160, 158, 133, 130, 131]
-    right_eye_indices = [362, 385, 387, 263, 362, 133]
-    nose_indices = [1, 2, 98, 326, 327]
-    mouth_indices = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91]
+    # MediaPipe 얼굴 랜드마크 인덱스 (정확한 포인트들)
+    left_eyebrow_indices = [70, 63, 105, 66, 107]
+    right_eyebrow_indices = [296, 334, 293, 300, 276]
+    left_eye_indices = [33, 7, 163, 144, 145, 153]
+    right_eye_indices = [362, 382, 381, 380, 374, 373]
+    nose_indices = [1, 2, 5, 4, 19, 94, 125, 141, 235, 236, 3, 51, 48, 115, 131, 134, 102, 49, 220, 305, 166, 79, 294, 455]
+    
+    # MediaPipe 공식 입 랜드마크 인덱스들
+    mouth_indices = [
+        61,   # 0: 왼쪽 입꼬리 (MOUTH_LEFT)
+        13,   # 1: 윗입술 중간-왼쪽
+        82,   # 2: 윗입술 왼쪽
+        18,   # 3: 윗입술 중앙 (MOUTH_TOP)
+        312,  # 4: 윗입술 오른쪽  
+        308,  # 5: 윗입술 중간-오른쪽
+        291,  # 6: 오른쪽 입꼬리 (MOUTH_RIGHT)
+        324,  # 7: 아랫입술 중간-오른쪽
+        318,  # 8: 아랫입술 오른쪽
+        17,   # 9: 아랫입술 중앙 (MOUTH_BOTTOM)
+        87,   # 10: 아랫입술 왼쪽
+        84,   # 11: 아랫입술 중간-왼쪽
+    ]
     
     for idx, landmark in enumerate(face_landmarks.landmark):
         x = int(landmark.x * w)
@@ -101,7 +117,28 @@ def draw_landmarks(image, landmarks):
     
     for key, points in landmarks.items():
         color = colors.get(key, (255, 255, 255))
-        for x, y in points:
-            cv2.circle(result, (x, y), 2, color, -1)
+        for i, (x, y) in enumerate(points):
+            # 입 랜드마크는 더 크게 표시
+            radius = 4 if key == 'mouth' else 2
+            cv2.circle(result, (x, y), radius, color, -1)
+            
+            # 입 포인트에 번호 표시 (입꼬리 확인용)
+            if key == 'mouth':
+                cv2.putText(result, str(i), (x+5, y-5), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+    
+    # 입꼬리 포인트 특별 표시 (더 큰 원)
+    if 'mouth' in landmarks and len(landmarks['mouth']) > 6:
+        # 왼쪽 입꼬리 (인덱스 0)
+        if len(landmarks['mouth']) > 0:
+            x, y = landmarks['mouth'][0]
+            cv2.circle(result, (x, y), 8, (0, 255, 255), 2)  # 노란 원
+            cv2.putText(result, 'L', (x-10, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+        
+        # 오른쪽 입꼬리 (인덱스 6)  
+        if len(landmarks['mouth']) > 6:
+            x, y = landmarks['mouth'][6]
+            cv2.circle(result, (x, y), 8, (0, 255, 255), 2)  # 노란 원
+            cv2.putText(result, 'R', (x+10, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
     
     return result
