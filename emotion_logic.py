@@ -234,10 +234,10 @@ def classify_emotion(landmarks):
         scores['happy'] += 2
     
     # 슬픔 (입꼬리 내려감 - 각도 180도 초과)
-    if corner_angle > 180:  # 입꼬리 내려감 (슬픔)
-        scores['sad'] += 15
-    if mouth_openness < 0.15:
-        scores['sad'] += 3
+    if 180 <= corner_angle:
+        scores['sad'] += 12
+    if mouth_openness < 0.25:
+        scores['sad'] += 7
     
     # 화남 (입 굳게 닫음, 입꼬리 약간 내려감)
     if corner_angle > 185:  # 입꼬리 많이 내려감

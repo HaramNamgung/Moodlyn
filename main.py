@@ -2,9 +2,28 @@ import cv2
 from preprocessing import preprocess_image
 from landmark_detection import detect_landmarks, draw_landmarks
 from emotion_logic import classify_emotion, get_emotion_details
+
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
+
+def choose_image():
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    filename = askopenfilename(
+        title="이미지 선택",
+        filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp")]
+    )
+    root.destroy()
+    return filename
+
+
+
 def main():
     # 1. 이미지 불러오기
-    image = cv2.imread("assets/sad1.jpg")
+    image_path = choose_image()
+    image = cv2.imread(image_path)
+
 
     # 2. 전처리
     processed = preprocess_image(image)
